@@ -1,0 +1,45 @@
+\chapter{Conclusion} 
+Connecting the dots in the large basket filled up with a variety of different optimizations and hardware architectures can be challenging. Using an auto-tuner can help you in finding the optimal solution for the specific stencil kernel, the problem size, and the choice in what platform to use. Although, as stated in \cite{article2}, stencil-specific optimization often yields better performance compared to compiler-based optimization due to their ability to take advantage of the specific knowledge related to the stencil computation. 
+
+%%i.e the reordering of the tetrahedral, discussed in section \ref{subsec:optimization_on_unstructured_meshes}
+
+The bottleneck primary lies in the speed of which the data is transferred from memory to the processor, and parallelism is only a small part of the performance challenge, resulting in memory focused optimizations. Before you start with the actual implementation, you have to have a good insight on how the processor and memory communicates, storage of data in the random access memory (RAM) compared to cache, and how it affects your stencil performance. An architectural evaluation across a diverse range of muilticore designs was done by \cite{article1}. in the case of operations done over a structured mesh, they concluded with employing a large number of simpler processors offers higher performance than those with small numbers of more complex processors. Additionally, when comparing cache based systems, architectures with a private L1 and L2 cache with a higher capacity offers a better performance, although requiring more programming overhead. 
+
+%%In the case of unstructured meshes, \cite{article4} identified cache bandwidth as a potential secondary bottleneck, but can often be circumvented by using proper reordering techniques.
+
+Stencil computation performance on the GPU shows promising results due to the massively-threaded, many-core streaming architecture, which yields built-in data level parallelism. Although not covered in this essay, it is of utmost importance in the HPC community.
+
+
+%%var intro: Stencil computation has been widely researched, and there are several optimization techniques for reaching higher performance.
+%%[4] identified cache bandwidth as a potential secondary bottleneck when the block size is in between very small and very large
+
+%%of what multicore design suits your stencil code best.
+
+%%identify 
+
+%%what kind of computer architecture best suits your stencil code. 
+%%effectively utilize cache
+
+%%The first step for optimizing a stencil involves a decomposition of the problem, making sure each process gets its fair share of tasks, also referred to as load balancing. 
+
+
+%%Problem decomposition aims to 
+
+
+%% Modern computers have several high speed CPU cores, but i
+%%Although not covered in this essay, peformance of GPU heterogenous blabla
+%%at which the speed is transefered from memory to the cpu
+%%!!!TANKER!!!
+%%different architectures
+%%connecting the dots in optimizing etc etc
+%%Connecting the dots as we dive deeper into stencil etc etc, bra start på konklusjon?
+%% conclusion: nevn GPU, not talked about gpu and its performance bla bla
+%% good serial part = good parallel part, ta med eller ikke?
+%%For a parallel program to be effective it needs a fully optimized serial part
+%%Many in-core optimizations involves transforming the inner loop as discussed in section \ref{subsec:problem_decomposition}
+%%According to [2], stencil computation optimization falls into two categories. The first is compiler based optimizations such as auto-tuning 
+%%of the data transfer from 
+%%tar vare på til senere
+%% memory constraints, why this is important to stencil (regular irregular)
+%%Stencil computations over a structured mesh are often classified as a regular application due to its regular connectivity in the mesh pattern. 
+%%Effectively use of the hierarchical memory system such as the different levels of cache, and memory proves to be a key factor in stencil computation performance. As research paper [4] concludes with, performance of irregular applications such as a 3D unstructured tetrahedral mesh

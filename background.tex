@@ -1,0 +1,107 @@
+\chapter{Background}
+%%ideer, forklare bottlenecks, faktorer, gå litt i detalj 
+%%In this Chapter I will point out what others have done to effectively optimize stencil computations over a mesh 
+%% multicore design
+%%methods, results, and conclusion
+%% A NUMA architecture is where each processor has its own private memory
+%%means that a processor can access its local memory much faster than the non-local memory
+%% since each processor has its own private system bus for sending and receiving data from memory
+%% means that each processor has its local memory 
+%%although in the context of multicore architectures 
+
+%%A NUMA architecture is where memory access time depends on the memory location relative to a processor
+%%although the memory architectures mentioned above is an old concept and not only bound to multicore architectures, knowing how the processes in a multicore architecture communicates and store data is essential high performance computing
+
+%% Although not only bound to multicore arhcitectures 
+%% in computer hardware, 
+
+\input{heart}
+
+\section{Multicore Architectures}
+\label{sec:multicore_architectures}
+Multicore technology is the most important factor that drives today’s microprocessor performance improvements \cite{article6}. The industry has moved away form exponential scaling of clock frequency toward chip multiprocessors (CMP). A modern computer typically consists of several independent CPU cores on the same socket, each having its own cache, and usually a global memory.  
+
+In computer hardware, there are mainly two different types of memory architecture, \textit{shared}, \textit{distributed}, and a hybrid of these two called \textit{distributed shared} memory. Although the memory architectures mentioned above are old concepts and not only bound to multicore architectures, knowing how the processes in a multicore architecture communicates and store data is essential high performance computing. Shared memory refers to a global address space that can be accessed by several different CPUs. Shared memory is easier to program because it offers an unified address space, although, synchronization is needed, and race conditions among the processes can occur. Shared memory architecture can be of two types, \textit{uniform memory access} (UMA) or \textit{non-uniform memory access} (NUMA). A UMA is when all the processors share the physical memory uniformly \cite{article8} meaning that memory access time is uniformly distributed among the CPU cores. A NUMA architecture means that a processor can access its local memory much faster than the non-local memory since each processor has its own system bus for sending and receiving data from memory. A distributed memory system refers to a system in which each processor has its own private memory region, and interaction between different processes happens over an interconnection network. It excludes race conditions and forces the programmer to think about data distribution in the sense that memory is scalable with the number of processing elements, also referred to as \textit{scalability}. every core should access its local memory unit as much as possible to ensure low latency, and a high memory bandwidth. 
+
+\begin{figure}[!h]
+  \begin{center}
+    \label{b_distributed_memory.png}
+    \includegraphics[width=0.45\textwidth]{bilder/b_distributed_memory}
+    \label{b_shared_memory.png}
+    \includegraphics[width=0.45\textwidth]{bilder/b_shared_memory}
+  \end{center}
+  \caption{overview of distributed and shared memory architecture, respectively. Taken from \cite{article8}}
+  \label{b_memory_hierarchy}
+\end{figure}
+
+\section{Parallel programming}
+\label{sec:problem_decomposition}
+\begin{figure}[h]
+ \centering 
+     \includegraphics[width=0.9\textwidth]{bilder/b_decomposition}
+     \caption{Explaining the decomposition process in a 3 dimensional structured mesh. Illustration taken from \cite{article9}.
+     \label{b_decomposition.png}}
+\end{figure}
+Parallel programming can be split into two categories, shared-memory programming such as Open Multi-Processing (OpenMP), and distributed-memory programming such as the Message Passing Interface (MPI). As discussed in section \ref{sec:multicore_architectures} both memory models have advantages and disadvantages. While OpenMP exploits the shared resources among threads, MPI relies on passing data from one process to another through an interconnection network, each having its own private memory region. In some cases you may want to utilize both programming models, a such technique is often referred to as hybrid parallel programming. In the following example, inspired by \cite{article9}, a hybrid approach can be effectively used to decomposition the problem.
+
+Problem decomposition is one of the most essential stages in a parallel implementation of a problem. Lets assume that we have a large 3D array representing a mesh. To ensure that each processing element gets an equal share of tasks to be executed, we divide the mesh (the entire problem) also referred to as a node block of size \(NX \times NY \times NZ\) into a chunk of core blocks of size (\textit{chunkSize}) \(CX \times CY \times CZ\). By doing so, each process can share its core of blocks. The core blocks are then divided into a series of thread blocks of size \(TX \times TY \times TZ\). Each CPU core usually have multiple threads, decompositioning the problem into thread blocks allows threads to share data which helps reduce capacity misses in the core’s shared cache \cite{article9}. When \( CX = TX\) and \( CY = TY\) there is only one thread per core block. In the third decomposition step, each thread block is then partitioned into register blocks of size \(RX \times RY \times RZ\). Register block optimization involves loop unrolling and jamming, both techniques involves transforming the inner loop. loop unrolling eliminates/reduces data dependency and improves pipelining, while loop jamming reduces loop overhead and gives a better chance for instruction overlap \cite{article10}.
+%%explain these, then explain unstructured mesh and why its different
+%%To ensure that each processing element gets and equal share of tasks to be executed. 
+%%TBD: fine-grained parallelism means that you have a large set of small tasks, which tends to be the case in stencil computation as the mesh size can be complex involving many operations.
+
+%%\subsection{Data Allocation} 
+
+\section{Stencil Computation Overview}
+Stencil calculations perform sweeps through data structures that are typically much larger than the available size of the cache. In addition, data reuse is limited to the number of points in the stencil. As a result, many stencil calculations tends to rely on the speed in which data is transferred from memory to the processor. Therefore, effectively use of the hierarchical memory system such as the different levels of cache, proves to be a key factor in stencil computation performance. Reducing communication overhead that occurs while sweeping through the mesh is also essential for high performance, and parallel programming in general.
+
+\subsection{Stencil Iteration Types}
+\label{subsec:stencil_iteration_types}
+Partial differential equations (PDE) are very important in science and engineering applications. Iterative Methods for solving PDEs has been extensively studied, and in this section I will cover three stencil iteration types, such as Jacobi, Gauss-Seidel, and Gauss-Seidel Red-Black iterations.
+
+\subsubsection{Jacobi}
+Iterative methods such as a Jacobi iteration performs a sweep over a mesh, applying a stencil (nearest-neighbor) to each point in the mesh, called the read mesh. Then the result is written to the corresponding point in the second mesh called the write mesh. The Jacobi method performs out-of-place operations, meaning that both read and write operations requires a distinct mesh. A parallel implementation of Jacobi can be done in an embarrassingly parallel fashion \footnote{A straight forward way of parallelizing a problem}, due to any point in the write mesh can be computed independently of each other. A drawback of Jacobi is that it requires to store distinct read and write arrays, resulting in increased memory storage, and the need for more bandwidth.
+
+\subsubsection{Gauss-Seidel}
+Gauss-Seidel iterations performs in-place sweeps, meaning that reading and writing to points are done over the same mesh. There can be several read-only meshes, although, a write mesh must be read from first. A drawback from this is that it limits the amount of available parallelism in the sweep, due to almost all the computed stencils will include some points that were already updated during the current sweep, and others that were not. This means that there is an inherent dependency chain that needs to be respected if we wish to replicate the same final answer \cite{article9}. One benefit from using Gauss-Seidel over Jacobi is that both read and write operations are done using the same mesh, thereby reducing the need for additional arrays, creating less memory traffic and storage requirements. 
+
+\subsubsection{Gauss-Seidel Red-Black}
+The Gauss-Seidel Red-Black (GSRB) iteration is similar to Gauss-Seidel in the sense that it performs in-place sweeps. To deal with the limited parallelism that the Gauss-Seidel iteration suffers from, a coloring of points are introduced. A black mesh point will only be updated if all the neighboring red points that it depends on have been updated. This process will continue for all the black mesh points. As a consequence, a GSRB iteration only updates every other point. Making this type of sweep similar in parallelism to Jacobi, since every single-color point can be updated independently of each other.
+
+\section{Optimization}
+\label{sec:optimization}
+Stencil optimization can be divided into two categories, stencil-specific, also referred to as source-level optimization, and compiler based optimizations such as auto-tuning. Following the source-level optimization described in \cite{article9}, we can roughly divide these optimizations into three categories.  Data allocation, bandwidth optimization and kernel optimization. 
+
+\subsection{Bandwidth Optimization}
+Improving memory bandwidth is a key factor for optimizing stencil computations. Research paper \cite{article9} introduces two methods for effectively increasing bandwidth. \textit{Software prefetching} aims to hide memory latency by allowing data to be moved into the cache before the data are used, and thereby increase effective memory bandwidth. Another way of increasing memory bandwidth is to reduce memory traffic by using a technique called \textit{cache bypassing}. A cache miss is a failed attempt at read or write a piece of data (also referred to as a cache line) in the cache, which requires access to main memory with much higher latency to get that piece of data, causing a great delay in the overall computation speed. As discussed in section \ref{subsec:stencil_iteration_types}, for a Jacobi iteration performing an out-of-place sweep we are only concerned with the write value being written back to DRAM, since the read data is left unused. As showed in \cite{article9}, getting rid of the extraneous reads for a Jacobi iteration using two meshes, you can eliminate \(\frac{1}{3}\) of the overall memory traffic by removing those cache line allocations, resulting in a 50\% improvement in arithmetic intensity, and if you are bandwidth bound, an increase in performance by up to 50\% \cite{article9}.
+
+\subsection{Kernel Optimization}
+Achieving good temporal and spatial locality is a main concern in stencil computation. Temporal locality refers to the reuse of data, if a memory location is referenced, it is most likely to be referenced again in the near future, thus storing and reusing a copy of the referenced data in a low latency, high memory bandwidth like the cache, yields better performance. Spatial locality refers to the use of neighboring data items. If a memory location is referenced, it is most likely that nearby memory locations will be referenced in the near future \cite{article14}.
+
+as discussed in section \ref{sec:problem_decomposition}, and implemented in \cite{article1}, register blocking involves loop transformations like unroll and jam. There are numerous other ways of optimizing a loop. Following the examples given in \cite{article10} we have \textit{loop interchange}, which involves exchanging the inner loop with the outer loop. This may improve the spatial and temporal locality. Reducing nested loops into a single-nested loop, also known as \textit{loop collapsing} may reduce loop overhead and improve run-time performance \cite{article11}. Another loop transformation technique named \textit{loop peeling} involves performing a problematic iteration separate before entering the loop, with the aim at eliminating dependencies or simplifying a loop. Other loop optimizations can be found in \cite{article12}.
+
+\subsection{Auto-tuning}
+Now that we have explored a variety of stencil specific optimizations, it is time to move on to compiler based optimization such as auto-tuning. Auto-tuners evaluates a large optimization space by generating variants of a given kernel, as discussed in section \ref{sec:optimization}, and benchmarking its performance. The search effectively tries all the optimizations and reports both peak performance and the most optimal parameters. Auto-tuning is not a new concept and existing libraries include ATLAS and FLAME for dense linear algebra, which involves dot product and matrix multiplication. The sparse linear algebra library OSKI, which involves sparse matrix-vector multiplication (SpMV), and Spiral for spectral methods. The auto-tuning environment created in \cite{article1} encompasses most of the stencil optimizations described in this essay, notably, their optimized stencil is 1.5\(\times\)-5.6\(\times\) faster than the naive parallel implementation, and with a median speedup of 4.1\(\times\)  on cache based architectures \cite{article1}.
+
+%%\subsection{Optimization on Unstructured Meshes}
+%%\label{subsec:optimization_on_unstructured_meshes}
+%%While most research has been devoted to stencil computation over structured meshes, the need for more accurately discretizing complex geometries has led to a rise in the use of unstructured mesh techniques \cite{article2}, \cite{article13}. Most stencil optimization techniques in a regular application consist of exploiting the regular geometric memory access pattern to achieve high performance and maximize the parallelism. Numerical operations over an unstructured mesh tends to yield lower performance and parallelism, due to the different geometric patterns based on the centered point in the stencil. Proved in research paper \cite{article4}, the key to high performance for unstructured tetrahedral meshes lies in a reordering of the tetrahedra, such that the resulting connectivity matrix resembles a block diagonal form where the optimal size of the blocks depends on the hardware \cite{article4}, meaning that carefully fitting the blocks of data in the cache is essential for high performance.
+
+%%Research paper \cite{article2} presents two strategies for evaluating stencil computation over a 2D unstructured triangular mesh, \textit{per-point} and \textit{per-element}. The per-point method iterates over a mesh, and for each point finds all of the triangles that intersect with the stencil centered around that point. The per-element method iterates over a mesh, and for every triangle finds all of the points whose stencil intersects with that triangle \cite{article2}. These two methods tries to maximize data-reuse and data locality. \cite{article2} also claims that the 2D solutions over an unstructured mesh can be extended to 3D unstructured tetrahedral meshes.
+
+%%\section{Related Work}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
