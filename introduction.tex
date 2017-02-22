@@ -25,6 +25,13 @@ A mesh is a collection of vertices, edges and faces \footnote{A vertex is a poin
 Computations over structured meshes incur regular memory accesses that are easier to achieve, among other things, good cache performance. In comparison, unstructured meshes will include irregular and indirect memory accesses, which are challenging with respect to cache utilization.
 A contiguous underlying data storage means that data elements are laid out end-to-end in the memory, with no discontinuities and padding between them, resulting in good memory patterns and high memory efficiency. A few techniques for assuring contiguous memory data storage involves dynamic memory allocation, and loop interchange. Optimization techniques will be discussed in greater detail in section \ref{sec:optimization}. 
 
+
+Approach: We will immerse the irregular 3D heart volume into a cube, which is then gridded with a uniform 3D mesh. Each mesh point is checked with respect to the original 3D heart volume, being either inside or outside. The "outside" points are included in a regular data structure, but will be numerically masked away during the actual computations. Although a considerable part of the computation is seemingly wasted, advantages for the overall computing speed may still arise due to the underlying regular data structure.
+
+Parallelization: If the above method of "binary cube" is to be further sped up by parallel computing, a viable strategy is to first divide the entire 3D cube into a number of smaller 3D subcubes. If a 3D subcube has none "inside points", then it can be ignored completely. The remaining subcubes, each having at least one "inside point", will be assigned to several computers (or CPU cores). The needed inter-subcube data exchange will be enabled by MPI communication.
+
+Objectives: The parallel implementation of "binary cube" should be used to do full-scale 3D heart simulations, which are of great interest to ongoing research activities at the Cardiac Modeling Department at Simula. Moreover, its overall parallel performance should be rigorously compared with a traditional parallel 3D heart simulator that is based on an unstructured mesh and data structure.
+
 %% Computations over structured meshes incur regular memory accesses that are easier to achieve, among other things, good cache performance 
 
 %%as a result, structured meshes generally leads to contiguous memory access, good memory layout patterns, and high cache efficiency \cite{article2}.
