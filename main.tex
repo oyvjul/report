@@ -3,8 +3,22 @@
 \usepackage[T1]{fontenc,url}
 \usepackage{setspace}
 \usepackage{mathtools}
+\usepackage{listings} 
+\lstdefinestyle{customc}{
+  language=C,
+  basicstyle=\footnotesize,
+  breakatwhitespace=false,         
+  breaklines=true,                 
+  captionpos=b,                    
+  keepspaces=true,                                
+  showspaces=false,                
+  showstringspaces=false,
+  showtabs=false,                  
+  tabsize=2
+}
 \usepackage{amsmath}
 \urlstyle{sf}
+\lstset{style=customc}
 \usepackage{babel,textcomp,csquotes,ifimasterforside,varioref,graphicx}
 \usepackage[backend=biber,style=numeric-comp]{biblatex}
 \linespread{1.3}

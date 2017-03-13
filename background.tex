@@ -44,12 +44,83 @@ In computer hardware, there are mainly two different types of memory architectur
 \end{figure}
 Parallel programming can be split into two categories, shared-memory programming such as Open Multi-Processing (OpenMP), and distributed-memory programming such as the Message Passing Interface (MPI). As discussed in section \ref{sec:multicore_architectures} both memory models have advantages and disadvantages. While OpenMP exploits the shared resources among threads, MPI relies on passing data from one process to another through an interconnection network, each having its own private memory region. In some cases you may want to utilize both programming models, a such technique is often referred to as hybrid parallel programming. In the following example, inspired by \cite{article9}, a hybrid approach can be effectively used to decomposition the problem.
 
-Problem decomposition is one of the most essential stages in a parallel implementation of a problem. Lets assume that we have a large 3D array representing a mesh. To ensure that each processing element gets an equal share of tasks to be executed, we divide the mesh (the entire problem) also referred to as a node block of size \(NX \times NY \times NZ\) into a chunk of core blocks of size (\textit{chunkSize}) \(CX \times CY \times CZ\). By doing so, each process can share its core of blocks. The core blocks are then divided into a series of thread blocks of size \(TX \times TY \times TZ\). Each CPU core usually have multiple threads, decompositioning the problem into thread blocks allows threads to share data which helps reduce capacity misses in the core’s shared cache \cite{article9}. When \( CX = TX\) and \( CY = TY\) there is only one thread per core block. In the third decomposition step, each thread block is then partitioned into register blocks of size \(RX \times RY \times RZ\). Register block optimization involves loop unrolling and jamming, both techniques involves transforming the inner loop. loop unrolling eliminates/reduces data dependency and improves pipelining, while loop jamming reduces loop overhead and gives a better chance for instruction overlap \cite{article10}.
+Problem decomposition is one of the most essential stages in a parallel implementation of a problem. Lets assume that we have a large 3D array representing a mesh. To ensure that each processing element gets an equal share of tasks to be executed, we divide the mesh (the entire problem) also referred to as a node block of size \(NX \times NY \times NZ\) into a chunk of core blocks of size (\textit{chunkSize}) \(CX \times CY \times CZ\). By doing so, each process can share its core of blocks. The core blocks are then divided into a series of thread blocks of size \(TX \times TY \times TZ\). Each CPU core usually have multiple threads, decompositioning the problem into thread blocks allows threads to share data which helps reduce capacity misses in the core’s shared cache \cite{article9}. When \( CX = TX\) and \( CY = TY\) there is only one thread per core block. In the third decomposition step, each thread block is then partitioned into register blocks of size \(RX \times RY \times RZ\). Register block optimization involves loop unrolling and jamming, both techniques involves transforming the inner loop. loop unrolling eliminates/reduces data dependency and improves pipelining, while loop jamming reduces loop overhead and gives a better chance for instruction overlap\cite{article10}. The dual of loop jamming is loop splitting. Loop splitting aims to reduce register pressure and remove data dependencies. loop splitting and loop unrolling tends to work really well together if your code has a high number of arithmethic operations. [INTEL]  See examples of loop unrolling and loop jamming below. 
+
+\begin{lstlisting}[caption=Loop unrolling]
+/*A simple example that assumues SIZE is divisible by 4*/
+sum = 0;
+for(i = 0; i < SIZE; i++)
+{
+	sum += a[i]*b[i];
+}
+
+sum = sum1 = sum2 = sum3 = sum4 = 0;
+for(int i = 0; i < SIZE-4; i+=4)
+{
+	sum1 += a[i]*b[i];
+	sum2 += a[i+1]*b[i+1];
+	sum3 += a[i+2]*b[i+2];
+	sum4 += a[i+3]*b[i+3];
+}
+sum = sum1 + sum2 + sum3 + sum4;
+\end{lstlisting}
+
+\begin{lstlisting}[caption=Loop jamming and loop splitting]
+/*The loop has been jammed/fussioned to reduce overhead*/
+sum = 0;
+for(i = 0; i < SIZE; i++)
+{
+	for(j = 0; j < SIZE; j++)
+	{
+		a[i][j] = (b[i-1][j] - b[i+1][j]) + (b[i][i-1j] - b[i][j+1]);
+	}
+}
+
+/*The innermost for loop has been split in two to reduce register pressure*/
+for(i = 0; i < SIZE; i++)
+{
+	for(j = 0; j < SIZE; j++)
+	{
+		a[i][j] = (b[i-1][j] - b[i+1][j]);
+	}
+	
+	for(j = 0; j < SIZE; j++)
+	{
+		a[i][j] += (b[i][i-1j] - b[i][j+1]);
+	}
+}
+\end{lstlisting}
 %%explain these, then explain unstructured mesh and why its different
 %%To ensure that each processing element gets and equal share of tasks to be executed. 
 %%TBD: fine-grained parallelism means that you have a large set of small tasks, which tends to be the case in stencil computation as the mesh size can be complex involving many operations.
 
 %%\subsection{Data Allocation} 
+
+\section{Optimization}
+\label{sec:optimization}
+Stencil optimization can be divided into two categories, stencil-specific, also referred to as source-level optimization, and compiler based optimizations such as auto-tuning. Following the source-level optimization described in \cite{article9}, we can roughly divide these optimizations into three categories.  Data allocation, bandwidth optimization and kernel optimization. 
+
+\subsection{Bandwidth Optimization}
+Improving memory bandwidth is a key factor for optimizing stencil computations. Research paper \cite{article9} introduces two methods for effectively increasing bandwidth. \textit{Software prefetching} aims to hide memory latency by allowing data to be moved into the cache before the data are used, and thereby increase effective memory bandwidth. Another way of increasing memory bandwidth is to reduce memory traffic by using a technique called \textit{cache bypassing}. A cache miss is a failed attempt at read or write a piece of data (also referred to as a cache line) in the cache, which requires access to main memory with much higher latency to get that piece of data, causing a great delay in the overall computation speed. As discussed in section \ref{subsec:stencil_iteration_types}, for a Jacobi iteration performing an out-of-place sweep we are only concerned with the write value being written back to DRAM, since the read data is left unused. As showed in \cite{article9}, getting rid of the extraneous reads for a Jacobi iteration using two meshes, you can eliminate \(\frac{1}{3}\) of the overall memory traffic by removing those cache line allocations, resulting in a 50\% improvement in arithmetic intensity, and if you are bandwidth bound, an increase in performance by up to 50\% \cite{article9}.
+
+\subsection{Kernel Optimization}
+Achieving good temporal and spatial locality is a main concern in stencil computation. Temporal locality refers to the reuse of data, if a memory location is referenced, it is most likely to be referenced again in the near future, thus storing and reusing a copy of the referenced data in a low latency, high memory bandwidth like the cache, yields better performance. Spatial locality refers to the use of neighboring data items. If a memory location is referenced, it is most likely that nearby memory locations will be referenced in the near future \cite{article14}.
+
+as discussed in section \ref{sec:problem_decomposition}, and implemented in \cite{article1}, register blocking involves loop transformations like unroll and jam. There are numerous other ways of optimizing a loop. Following the examples given in \cite{article10} we have \textit{loop interchange}, which involves exchanging the inner loop with the outer loop. This may improve the spatial and temporal locality. Reducing nested loops into a single-nested loop, also known as \textit{loop collapsing} may reduce loop overhead and improve run-time performance \cite{article11}. Another loop transformation technique named \textit{loop peeling} involves performing a problematic iteration separate before entering the loop, with the aim at eliminating dependencies or simplifying a loop. Finally we have cache blocking, also known as loop blocking.  For the interested reader, other loop optimizations can be found in \cite{article12}.
+
+\begin{lstlisting}[caption=Cache Blocking]
+/*Simple example of cache blocking*/
+int bx = 16 // block size
+int by = 32 // block size
+for(ii = 1; ii < n; ii+=by)
+ 	for(jj = 1; jj < n; jj+=bx)
+     	for(i = ii; i <= min(ii+by, n); i++)
+         	for(j = jj; j <= min(jj+bx, n); j++)
+         		a[i][j] += a[i][j]*b[i][j]*c[i][j]
+\end{lstlisting}
+
+\subsection{Auto-tuning}
+Now that we have explored a variety of stencil specific optimizations, it is time to move on to compiler based optimization such as auto-tuning. Auto-tuners evaluates a large optimization space by generating variants of a given kernel, as discussed in section \ref{sec:optimization}, and benchmarking its performance. The search effectively tries all the optimizations and reports both peak performance and the most optimal parameters. Auto-tuning is not a new concept and existing libraries include ATLAS and FLAME for dense linear algebra, which involves dot product and matrix multiplication. The sparse linear algebra library OSKI, which involves sparse matrix-vector multiplication (SpMV), and Spiral for spectral methods. The auto-tuning environment created in \cite{article1} encompasses most of the stencil optimizations described in this essay, notably, their optimized stencil is 1.5\(\times\)-5.6\(\times\) faster than the naive parallel implementation, and with a median speedup of 4.1\(\times\)  on cache based architectures \cite{article1}.
 
 \section{Stencil Computation Overview}
 Stencil calculations perform sweeps through data structures that are typically much larger than the available size of the cache. In addition, data reuse is limited to the number of points in the stencil. As a result, many stencil calculations tends to rely on the speed in which data is transferred from memory to the processor. Therefore, effectively use of the hierarchical memory system such as the different levels of cache, proves to be a key factor in stencil computation performance. Reducing communication overhead that occurs while sweeping through the mesh is also essential for high performance, and parallel programming in general.
@@ -66,21 +137,6 @@ Gauss-Seidel iterations performs in-place sweeps, meaning that reading and writi
 
 \subsubsection{Gauss-Seidel Red-Black}
 The Gauss-Seidel Red-Black (GSRB) iteration is similar to Gauss-Seidel in the sense that it performs in-place sweeps. To deal with the limited parallelism that the Gauss-Seidel iteration suffers from, a coloring of points are introduced. A black mesh point will only be updated if all the neighboring red points that it depends on have been updated. This process will continue for all the black mesh points. As a consequence, a GSRB iteration only updates every other point. Making this type of sweep similar in parallelism to Jacobi, since every single-color point can be updated independently of each other.
-
-\section{Optimization}
-\label{sec:optimization}
-Stencil optimization can be divided into two categories, stencil-specific, also referred to as source-level optimization, and compiler based optimizations such as auto-tuning. Following the source-level optimization described in \cite{article9}, we can roughly divide these optimizations into three categories.  Data allocation, bandwidth optimization and kernel optimization. 
-
-\subsection{Bandwidth Optimization}
-Improving memory bandwidth is a key factor for optimizing stencil computations. Research paper \cite{article9} introduces two methods for effectively increasing bandwidth. \textit{Software prefetching} aims to hide memory latency by allowing data to be moved into the cache before the data are used, and thereby increase effective memory bandwidth. Another way of increasing memory bandwidth is to reduce memory traffic by using a technique called \textit{cache bypassing}. A cache miss is a failed attempt at read or write a piece of data (also referred to as a cache line) in the cache, which requires access to main memory with much higher latency to get that piece of data, causing a great delay in the overall computation speed. As discussed in section \ref{subsec:stencil_iteration_types}, for a Jacobi iteration performing an out-of-place sweep we are only concerned with the write value being written back to DRAM, since the read data is left unused. As showed in \cite{article9}, getting rid of the extraneous reads for a Jacobi iteration using two meshes, you can eliminate \(\frac{1}{3}\) of the overall memory traffic by removing those cache line allocations, resulting in a 50\% improvement in arithmetic intensity, and if you are bandwidth bound, an increase in performance by up to 50\% \cite{article9}.
-
-\subsection{Kernel Optimization}
-Achieving good temporal and spatial locality is a main concern in stencil computation. Temporal locality refers to the reuse of data, if a memory location is referenced, it is most likely to be referenced again in the near future, thus storing and reusing a copy of the referenced data in a low latency, high memory bandwidth like the cache, yields better performance. Spatial locality refers to the use of neighboring data items. If a memory location is referenced, it is most likely that nearby memory locations will be referenced in the near future \cite{article14}.
-
-as discussed in section \ref{sec:problem_decomposition}, and implemented in \cite{article1}, register blocking involves loop transformations like unroll and jam. There are numerous other ways of optimizing a loop. Following the examples given in \cite{article10} we have \textit{loop interchange}, which involves exchanging the inner loop with the outer loop. This may improve the spatial and temporal locality. Reducing nested loops into a single-nested loop, also known as \textit{loop collapsing} may reduce loop overhead and improve run-time performance \cite{article11}. Another loop transformation technique named \textit{loop peeling} involves performing a problematic iteration separate before entering the loop, with the aim at eliminating dependencies or simplifying a loop. Other loop optimizations can be found in \cite{article12}.
-
-\subsection{Auto-tuning}
-Now that we have explored a variety of stencil specific optimizations, it is time to move on to compiler based optimization such as auto-tuning. Auto-tuners evaluates a large optimization space by generating variants of a given kernel, as discussed in section \ref{sec:optimization}, and benchmarking its performance. The search effectively tries all the optimizations and reports both peak performance and the most optimal parameters. Auto-tuning is not a new concept and existing libraries include ATLAS and FLAME for dense linear algebra, which involves dot product and matrix multiplication. The sparse linear algebra library OSKI, which involves sparse matrix-vector multiplication (SpMV), and Spiral for spectral methods. The auto-tuning environment created in \cite{article1} encompasses most of the stencil optimizations described in this essay, notably, their optimized stencil is 1.5\(\times\)-5.6\(\times\) faster than the naive parallel implementation, and with a median speedup of 4.1\(\times\)  on cache based architectures \cite{article1}.
 
 %%\subsection{Optimization on Unstructured Meshes}
 %%\label{subsec:optimization_on_unstructured_meshes}
