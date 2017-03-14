@@ -116,11 +116,13 @@ for(ii = 1; ii < n; ii+=by)
  	for(jj = 1; jj < n; jj+=bx)
      	for(i = ii; i <= min(ii+by, n); i++)
          	for(j = jj; j <= min(jj+bx, n); j++)
-         		a[i][j] += a[i][j]*b[i][j]*c[i][j]
+         		a[i][j] += b[i][j]*c[i][j]*d[i][j]
 \end{lstlisting}
 
 \subsection{Auto-tuning}
 Now that we have explored a variety of stencil specific optimizations, it is time to move on to compiler based optimization such as auto-tuning. Auto-tuners evaluates a large optimization space by generating variants of a given kernel, as discussed in section \ref{sec:optimization}, and benchmarking its performance. The search effectively tries all the optimizations and reports both peak performance and the most optimal parameters. Auto-tuning is not a new concept and existing libraries include ATLAS and FLAME for dense linear algebra, which involves dot product and matrix multiplication. The sparse linear algebra library OSKI, which involves sparse matrix-vector multiplication (SpMV), and Spiral for spectral methods. The auto-tuning environment created in \cite{article1} encompasses most of the stencil optimizations described in this essay, notably, their optimized stencil is 1.5\(\times\)-5.6\(\times\) faster than the naive parallel implementation, and with a median speedup of 4.1\(\times\)  on cache based architectures \cite{article1}.
+
+A modern way of auto-tuning code is by letting the compiler.... SKRIVE MEIR
 
 \section{Stencil Computation Overview}
 Stencil calculations perform sweeps through data structures that are typically much larger than the available size of the cache. In addition, data reuse is limited to the number of points in the stencil. As a result, many stencil calculations tends to rely on the speed in which data is transferred from memory to the processor. Therefore, effectively use of the hierarchical memory system such as the different levels of cache, proves to be a key factor in stencil computation performance. Reducing communication overhead that occurs while sweeping through the mesh is also essential for high performance, and parallel programming in general.
