@@ -50,9 +50,7 @@ Problem decomposition is one of the most essential stages in a parallel implemen
 /*A simple example that assumues SIZE is divisible by 4*/
 sum = 0;
 for(i = 0; i < SIZE; i++)
-{
 	sum += a[i]*b[i];
-}
 
 sum = sum1 = sum2 = sum3 = sum4 = 0;
 for(int i = 0; i < SIZE-4; i+=4)
@@ -66,28 +64,20 @@ sum = sum1 + sum2 + sum3 + sum4;
 \end{lstlisting}
 
 \begin{lstlisting}[caption=Loop jamming and loop splitting]
-/*The loop has been jammed/fussioned to reduce overhead*/
+/*The innermost loop has been jammed/fussioned to reduce overhead*/
 sum = 0;
 for(i = 0; i < SIZE; i++)
-{
 	for(j = 0; j < SIZE; j++)
-	{
 		a[i][j] = (b[i-1][j] - b[i+1][j]) + (b[i][i-1j] - b[i][j+1]);
-	}
-}
 
 /*The innermost for loop has been split in two to reduce register pressure*/
 for(i = 0; i < SIZE; i++)
 {
 	for(j = 0; j < SIZE; j++)
-	{
 		a[i][j] = (b[i-1][j] - b[i+1][j]);
-	}
 	
 	for(j = 0; j < SIZE; j++)
-	{
 		a[i][j] += (b[i][i-1j] - b[i][j+1]);
-	}
 }
 \end{lstlisting}
 %%explain these, then explain unstructured mesh and why its different
@@ -110,7 +100,7 @@ as discussed in section \ref{sec:problem_decomposition}, and implemented in \cit
 
 \begin{lstlisting}[caption=Cache Blocking]
 /*Simple example of cache blocking*/
-int bx = 16 // block size
+int bx = 64 // block size
 int by = 32 // block size
 for(ii = 1; ii < n; ii+=by)
  	for(jj = 1; jj < n; jj+=bx)
