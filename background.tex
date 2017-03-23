@@ -114,6 +114,12 @@ Now that we have explored a variety of stencil specific optimizations, it is tim
 
 A modern way of auto-tuning code is by letting the compiler.... SKRIVE MEIR
 
+\subsection{Performance Modelling}
+It is important to study the performance of a program with a view of determining the best implementation of a given algorithm. Evaluating the hardware platform, as well as exploiting the benefits of parallelism is essential for achieving high performance. In this section I will introduce essential metrics for analysing the performance of program code.
+
+A commonly used metric for processor performance is given by FLOPS; floating point operations per second. 
+
+
 \section{Stencil Computation Overview}
 Stencil calculations perform sweeps through data structures that are typically much larger than the available size of the cache. In addition, data reuse is limited to the number of points in the stencil. As a result, many stencil calculations tends to rely on the speed in which data is transferred from memory to the processor. Therefore, effectively use of the hierarchical memory system such as the different levels of cache, proves to be a key factor in stencil computation performance. Reducing communication overhead that occurs while sweeping through the mesh is also essential for high performance, and parallel programming in general.
 
