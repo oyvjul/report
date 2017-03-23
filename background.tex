@@ -112,12 +112,36 @@ for(ii = 1; ii < n; ii+=by)
 \subsection{Auto-tuning}
 Now that we have explored a variety of stencil specific optimizations, it is time to move on to compiler based optimization such as auto-tuning. Auto-tuners evaluates a large optimization space by generating variants of a given kernel, as discussed in section \ref{sec:optimization}, and benchmarking its performance. The search effectively tries all the optimizations and reports both peak performance and the most optimal parameters. Auto-tuning is not a new concept and existing libraries include ATLAS and FLAME for dense linear algebra, which involves dot product and matrix multiplication. The sparse linear algebra library OSKI, which involves sparse matrix-vector multiplication (SpMV), and Spiral for spectral methods. The auto-tuning environment created in \cite{article1} encompasses most of the stencil optimizations described in this essay, notably, their optimized stencil is 1.5\(\times\)-5.6\(\times\) faster than the naive parallel implementation, and with a median speedup of 4.1\(\times\)  on cache based architectures \cite{article1}.
 
-A modern way of auto-tuning code is by letting the compiler.... SKRIVE MEIR
+%%A modern way of auto-tuning code is by letting the compiler.... SKRIVE MEIR
 
 \subsection{Performance Modelling}
 It is important to study the performance of a program with a view of determining the best implementation of a given algorithm. Evaluating the hardware platform, as well as exploiting the benefits of parallelism is essential for achieving high performance. In this section I will introduce essential metrics for analysing the performance of program code.
 
-A commonly used metric for processor performance is given by FLOPS; floating point operations per second. 
+\subsubsection{FLOPS}
+A commonly used metric for processor performance is given by FLOPS; floating point operations per second. Which is usefull for measuring the floating point operation exectuion rate of a given algorithm or computer hardware
+
+\begin{lstlisting} [caption=Example of FLOPS]
+
+ for(j = 1; j < nx; j++)
+ 	a[i] = (a[i]+ b[i] + c[i])*dx
+
+\end{lstlisting}
+
+From example \ref{flops} we can see that the equation in the for loop consists of  2 additions and 1 multiplication, which results in a total of 3 arithmetic operations. From this we develop a simple model for calculating FLOPS, which is given in equation \ref{eq1}
+\begin{equation} \label{eq1}
+\frac{\textrm{Number of Arithmetic operations} \times \textrm{Number of iterations}}{\textrm{Time spent}} 
+\end{equation}
+
+If we were to solve example X.X with 3 arithmetic operations, for a total of 
+ \(nx = 100 000\) iterations, and time measured executing the for loop is  \(time spent = 0.0004 s\), we get a total of
+ 
+ \begin{equation} 
+\frac{3 \times 100 000}{0.0004} = 0.75 \textrm{GFLOP/s}
+\end{equation}
+
+\subsubsection{Speedup}
+When evaluating a parallel implementation we are often interested in how much faster the parallel code is compared to the sequential code.
+The Execution time of a parallel program is the time that elapses from the moment the parallel program starts to the moment the last processing unit finishes. 
 
 
 \section{Stencil Computation Overview}
