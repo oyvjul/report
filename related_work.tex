@@ -2,9 +2,34 @@
 After a MRI scan of the heart, the resulting data are stored as a point cloud, which is a huge collection of unstructured points, that typically needs advanced mesh generation techniques that consists of triangulations of the stored point cloud to form an accurate 3-D model of the human heart, that more specifically, is a large collection tetrahedras. The goal of my implementation is to generate a uniformly structured mesh, using the unstructured data as a basis for checking if a generated point is inside or outside the unstructured heart geometry. The resulting structured mesh will consist of points both inside and outside the heart, but will later be numerically masked away. A detailed description of the numerical strategy will be provided later in section X.X.
 
 \section{The Processing of Unstructured data}
-The unstructured data, consisting of a collection of tetrahedras comes in several different files
+The unstructured data, consisting of a collection of vertex points, edges, faces, and a description of neighbouring elements comes in several different files. In the process of generating the structured mesh from the unstrctured data, an extraction of the tetrahedras vertex points are the only necessary information needed, due to the reason that I only need to check if a generated point is inside or outside a given tetrahedra. The complete process of mesh generation can be found later in section \ref{generating_the structured_mesh}.
+
+For the process of extracting the vertex information of a tetrahedra, two files has to be read, an element (.ele) and a node (.node) file, both of which are of ASCII[FOOTNOTE] form.
+
+\subsection{.node files}
+\begin{lstlisting}[caption=.node file]
+First line:	<# of points> <dimension (3)> <# of attributes>
+			 	<boundary markers (0 or 1)>
+Remaining lines list # of points:
+				<point #> <x> <y> <z> [attributes] [boundary marker]
+				...
+\end{lstlisting}
+The .node file contains information of every vertex point of the unstructured mesh. The first line contains information of how many points there is, and in how many dimensions. The remaining lines contains a list of points. Each point has a respective x, y and z coordinate, which reveals the position of the vertex point in the coordinate system.
+
+%%KILDE: http://wias-berlin.de/software/tetgen/files/tetgen-manual.pdf
+
+\subsection{.ele files}
+\begin{lstlisting}[caption=.ele file]
+First line:	<# of tetrahedra> <nodes per tet. 4>
+				<region attribute (0 or 1)>
+Remaining lines list # of tetrahedra:
+				<tetrahedron #> <node> <node> ... <node> [attribute]
+				...
+\end{lstlisting}
+%%KILDE: http://wias-berlin.de/software/tetgen/files/tetgen-manual.pdf
 
 \section{Generating the Structured Mesh}
+\label{generating_the structured_mesh}
 For an ease of understanding of the process of how the structured mesh is generated, most of the illustrations and examples will be explained from a 2 dimensional perspective.
 
 \begin{figure}[h]
