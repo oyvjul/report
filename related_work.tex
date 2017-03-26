@@ -28,10 +28,10 @@ Remaining lines list # of tetrahedra:
 				<tetrahedron #> <node (point #)> <node (point #)> ... <node (point #)>
 				...
 \end{lstlisting}
-The .ele files contains information relative to each respective tetrahedra. The first line contains information of how many tetrahedras there is, and how many nodes or vertex points there is per tetrahedra. The remaining lines contains an tetrahedra id and its respective vertex points.
+The .ele files contains information relative to each respective tetrahedra. The first line contains information of how many tetrahedras there is, and how many nodes or vertex points there is per tetrahedra. The remaining lines contains an tetrahedra id and its respective vertex points. The unique node ids in the .ele file are used as indices into the corresponding .node file. 
 %%KILDE: http://wias-berlin.de/software/tetgen/files/tetgen-manual.pdf
 
-The unique node id in the .ele file are used as indices into the corresponding .node file. Since there are no universal ordering of the tetrahedra [KILDE XING]
+Since there are no universal ordering of the tetrahedral mesh \cite{article4} the only viable option for storing the vertex points are in a 1D array. A complete random ordering of the vertex points results in cosequent random jumps in memory, resulting in poor computation speed \cite{article4}.
 
 \begin{figure}[h]
  \centering 
@@ -43,7 +43,7 @@ The unique node id in the .ele file are used as indices into the corresponding .
 
 \section{Generating the Structured Mesh}
 \label{generating_the structured_mesh}
-For an ease of understanding of the process of how the structured mesh is generated, most of the illustrations and examples will be explained from a 2 dimensional perspective.
+For an ease of understanding of the process of how the structured mesh is generated, most of the illustrations and examples will be explained from a 2D perspective.
 
 \begin{figure}[h]
  \centering 
