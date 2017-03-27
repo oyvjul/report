@@ -3,6 +3,9 @@ After a MRI scan of the heart, the resulting data are stored as a point cloud, w
 
 The goal of my implementation is to generate a uniformly structured mesh, using the unstructured data as a basis for checking if a generated point is inside or outside the unstructured heart geometry. The resulting structured mesh will consist of points both inside and outside the heart, but will later be numerically masked away. A detailed description of the numerical strategy will be provided later in section X.X.
 
+\section{Motivation}
+explain motivation behind doing this.
+
 \section{The Processing of Unstructured data}
 The unstructured data, consisting of a collection of vertex points, edges, faces, and a description of neighbouring elements comes in several different files. In the process of generating the structured mesh from the unstrctured data, an extraction of the tetrahedras vertex points are the only necessary information needed, due to the reason that I only need to check if a generated point is inside or outside a given tetrahedra. The complete process of mesh generation can be found later in section \ref{generating_the structured_mesh}.
 
@@ -25,10 +28,10 @@ The .node file contains information of every vertex point of the unstructured me
 First line:	<# of tetrahedra> <nodes per tet. 4>
 
 Remaining lines list # of tetrahedra:
-				<tetrahedron #> <node (point #)> <node (point #)> ... <node (point #)>
+				<tetrahedron #> <node (point #)> <node (point #)> ... 
 				...
 \end{lstlisting}
-The .ele files contains information relative to each respective tetrahedra. The first line contains information of how many tetrahedras there is, and how many nodes or vertex points there is per tetrahedra. The remaining lines contains an tetrahedra id and its respective vertex points. The unique node ids in the .ele file are used as indices into the corresponding .node file. 
+The .ele files contains information relative to each respective tetrahedra. The first line contains information of how many tetrahedras there is, and how many nodes or vertex points there is per tetrahedra. The remaining lines contains an tetrahedra id and its respective vertex points. The unique node ids in the .ele file are used as indices into the corresponding .node file for extracting the vertex points. 
 %%KILDE: http://wias-berlin.de/software/tetgen/files/tetgen-manual.pdf
 
 Since there are no universal ordering of the tetrahedral mesh \cite{article4} the only viable option for storing the vertex points are in a 1D array. A complete random ordering of the vertex points results in cosequent random jumps in memory, resulting in poor computation speed \cite{article4}.
@@ -43,7 +46,18 @@ Since there are no universal ordering of the tetrahedral mesh \cite{article4} th
 
 \section{Generating the Structured Mesh}
 \label{generating_the structured_mesh}
-For an ease of understanding of the process of how the structured mesh is generated, most of the illustrations and examples will be explained from a 2D perspective.
+Now that I have explained the pre processing steps of extracting the vertex points from the tetrahedral mesh, it is time to move on to the processing of the unstructured data, and the generation of the structured mesh.
+
+For an ease of understanding the process of how the structured mesh is generated, most of the illustrations and examples will be coordinated in a 2D fashion.
+
+\begin{figure}[h]
+ \centering 
+     \includegraphics[width=0.9\textwidth]{bilder/m_grid_points}
+     \caption{http://www.austincc.edu/rfofi/NursingRvw/PhysText/Cardiac.html}.
+     \label{m_grid_points.png}
+\end{figure}
+
+Before filling the structured mesh with mesh points, I need to know the boundary values for the tetrahedral mesh, which involves computing the minimum and maximum values for the x, y and z coordinates in the coordinate system. The boundary values will be used as a basis for generating uniformly distributed points.
 
 \begin{figure}[h]
  \centering 
@@ -52,12 +66,6 @@ For an ease of understanding of the process of how the structured mesh is genera
      \label{m_points_inside.png}
 \end{figure}
 
-\begin{figure}[h]
- \centering 
-     \includegraphics[width=0.9\textwidth]{bilder/m_grid_points}
-     \caption{http://www.austincc.edu/rfofi/NursingRvw/PhysText/Cardiac.html}.
-     \label{m_grid_points.png}
-\end{figure}
 
 \section{The Binary cube}
 
