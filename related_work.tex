@@ -57,7 +57,23 @@ For an ease of understanding the process of how the structured mesh is generated
      \label{m_grid_points.png}
 \end{figure}
 
-Before filling the structured mesh with mesh points, I need to know the boundary values for the tetrahedral mesh, which involves computing the minimum and maximum values for the x, y and z coordinates in the coordinate system. The boundary values will be used as a basis for generating uniformly distributed points.
+Before filling the structured mesh with mesh points, I need to know the boundary values for the tetrahedral mesh, which involves computing the minimum and maximum values for the x, y and z coordinates in the coordinate system. The boundary values will be used as a upper and lower limit for the structured mesh, aswell as a stepping value for generating uniformly distributed mesh points. The stepping value is the distance between each mesh point. The algorithm for determining the stepping value is given in equation \ref{step}
+%%\begin{lstlisting}[caption={Cache Blocking} ,label={lst:stepx}]
+%%step_x = (x_max - x_min)/nx;
+%%\end{lstlisting}
+
+\begin{equation} \label{step}
+\textrm{Stepping value} = \frac{\textrm{Max value } - \textrm{Min value}}{\textrm{Number of points}} 
+\end{equation}
+
+Each respective mesh points can then be attained by following equation \ref{step} for calculating the x, y and z coordinate of each respective mesh point.
+
+\begin{equation} \label{step}
+\textrm{Mesh point} = \textrm{Min value} + (\textrm{stepping value} \times i)
+\end{equation}
+
+Where \(i\) is an increment of the total number of points in one direction. 
+
 
 \begin{figure}[h]
  \centering 
@@ -68,7 +84,15 @@ Before filling the structured mesh with mesh points, I need to know the boundary
 
 
 \section{The Binary cube}
+After the structured mesh has been filled with points, each point is checked with respect to the original 3D heart volume, being either inside or outside. More specifically, the mesh points is checked with respect to every tetrahedra in the unstructured mesh. The resulting data structured is what is referred to as a binary cube, consisting of both the inside and outside points. The inside points will be given a numerical value which will be used later in the heart simulation, while the outside points are given a value to be identified commonly to all outside points.
+
+\subsection{Pre Processing of the Binary Cube}
+The binary cube is a representation of all the generated points, stored in a 3D array. 
+
+The generation of the binary cube is a time consuming process. 
 
 
+
+%%Every point in the structured mesh has to be checked accordingly if
 
 
