@@ -126,11 +126,11 @@ Now that we have explored a variety of stencil specific optimizations, it is tim
 
 %%A modern way of auto-tuning code is by letting the compiler.... SKRIVE MEIR
 
-\subsection{Performance Modelling}
+\section{Performance Modelling}
 It is important to study the performance of a program with a view of determining the best implementation of a given algorithm. Evaluating the hardware platform, as well as exploiting the benefits of parallelism is essential for achieving high performance. In this section I will introduce essential metrics for analysing the performance of program code.
 
-\subsubsection{FLOPS}
-\label{subsubsec:flops}
+\subsection{FLOPS}
+\label{subsec:flops}
 A commonly used metric for processor performance is given by FLOPS; floating point operations per second. Which is usefull for measuring the floating point operation exectuion rate of a given implementation or computer hardware
 
 \begin{lstlisting} [caption={Loop}, label={lst:forloop}]
@@ -152,7 +152,7 @@ If we were to solve example X.X with 3 arithmetic operations, for a total of
 \frac{3 \times 100 000}{0.0004} = 0.75 \textrm{ GFLOP/s}
 \end{equation}
 
-\subsubsection{Speedup}
+\subsection{Speedup}
 When evaluating a parallel implementation we are often interested in how much faster the parallel code is compared to the sequential code.
 The Execution time of a parallel program is the time that elapses from the moment the parallel program starts to the moment the last processing unit finishes. If the sequential time is denoted by \(T_s\), and the parallel time is denoted by \(T_p\). Then the speedup (S) is defined as ratio of the time taken by best sequential algorithm (\(T_s\)) to the time taken by solving the same problem on \(p\) processing units (\(T_p\)). The equation for calculating the speedup is thus, 
 
@@ -160,8 +160,8 @@ The Execution time of a parallel program is the time that elapses from the momen
 S = \frac{T_s}{T_p} 
 \end{equation}
 
-\subsubsection{Bandwidth}
-As in the case of determining the computational performance of an implementation given in section \ref{subsubsec:flops}. Another useful metric for determining the memory bandwidth performance of an implementation is to measure the movement of bytes from the memory, to the CPU per second. The memory bandwidth can be attained by calculating the ratio of number of loads multiplied by the datatype (in bytes) and arrays size to the time measured time executing the loop.
+\subsection{Bandwidth}
+As in the case of determining the computational performance of an implementation given in section \ref{subsec:flops}. Another useful metric for determining the memory bandwidth performance of an implementation is to measure the movement of bytes from the memory, to the CPU per second. The memory bandwidth can be attained by calculating the ratio of number of loads multiplied by the datatype (in bytes) and arrays size to the time measured time executing the loop.
 
 \begin{equation} \label{bw}
 \frac{\textrm{Number of loads} \times \textrm{Datatype}  \times \textrm{Array size}}{\textrm{Time spent}} 

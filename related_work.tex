@@ -4,10 +4,11 @@ After a MRI scan of the heart, the resulting data are stored as a point cloud, w
 The goal of my implementation is to generate a uniformly structured mesh, using the unstructured data as a basis for checking if a generated point is inside or outside the unstructured heart geometry. The resulting structured mesh will consist of points both inside and outside the heart, but will later be numerically masked away. A detailed description of the numerical strategy will be provided later in section X.X.
 
 \section{Motivation}
-explain motivation behind doing this.
+%%explain motivation behind doing this.
+As [HEART BOOK]
 
 \section{The Processing of Unstructured data}
-The unstructured data, consisting of a collection of vertex points, edges, faces, and a description of neighbouring elements comes in several different files. In the process of generating the structured mesh from the unstrctured data, an extraction of the tetrahedras vertex points are the only necessary information needed, due to the reason that I only need to check if a generated point is inside or outside a given tetrahedra. The complete process of mesh generation can be found later in section \ref{generating_the structured_mesh}.
+The unstructured data, consisting of a collection of vertex points, edges, faces, and a description of neighbouring elements comes in several different files. In the process of generating the structured mesh from the unstrctured data, an extraction of the tetrahedras vertex points are the only necessary information needed, due to the reason that you only need to check if a generated point is inside or outside a given tetrahedra. The complete process of mesh generation can be found later in section \ref{generating_the structured_mesh}.
 
 For the process of extracting the vertex information of a tetrahedra, two files has to be read, an element (.ele) and a node (.node) file, both of which are of ASCII[FOOTNOTE] form.
 
@@ -57,13 +58,13 @@ For an ease of understanding the process of how the structured mesh is generated
      \label{m_grid_points.png}
 \end{figure}
 
-Before filling the structured mesh with mesh points, I need to know the boundary values for the tetrahedral mesh, which involves computing the minimum and maximum values for the x, y and z coordinates in the coordinate system. The boundary values will be used as a upper and lower limit for the structured mesh, aswell as a stepping value for generating uniformly distributed mesh points. The stepping value is the distance between each mesh point. The algorithm for determining the stepping value is given in equation \ref{step}
+Before filling the structured mesh with mesh points, I need to know the boundary values for the tetrahedral mesh, which involves computing the minimum and maximum values for the x, y and z coordinates in the coordinate system. The boundary values will be used as a upper and lower limit for the structured mesh, aswell as a stepping value for generating uniformly distributed mesh points. The stepping value is the distance between each mesh point. The algorithm for determining the stepping value in the x-direction is given in equation \ref{step}.
 %%\begin{lstlisting}[caption={Cache Blocking} ,label={lst:stepx}]
 %%step_x = (x_max - x_min)/nx;
 %%\end{lstlisting}
 
 \begin{equation} \label{step}
-\textrm{Stepping value} = \frac{\textrm{Max value } - \textrm{Min value}}{\textrm{Number of points}} 
+\textrm{Stepping value_x} = \frac{\textrm{Max value} - \textrm{Min value}}{\textrm{Number of points}} 
 \end{equation}
 
 Each respective mesh points can then be attained by following equation \ref{step} for calculating the x, y and z coordinate of each respective mesh point.
@@ -90,6 +91,12 @@ After the structured mesh has been filled with points, each point is checked wit
 The binary cube is a representation of all the generated points, stored in a 3D array. 
 
 The generation of the binary cube is a time consuming process. 
+
+\section{The Simulation}
+start of simulation
+
+\section{Masking Away Outside Points}
+Numerical strategy
 
 
 
