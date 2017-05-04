@@ -1,6 +1,8 @@
 \chapter{Stencil Computation over Structured Meshes and Parallel Programming in Multicore Architectures}
 This chapter will be focusing on stencil computation and its development over the recent years due to the complex nature of modern computer architectures involving chip multicore processors (CMP) and heterogeneous system architectures. I will give a thorough description of stencil computation, CMP-systems as well as parallelization of such problems, methods and optimizations on structured meshes
 
+%%the following chapter, x.x will discuss and implement methods for optimization over structured grids.
+
 \section{Introduction}
 Stencil computations are operations performed by many numerical methods in the context of scientific  applications. A \textit{stencil} is a geometric pattern of a nodal group centered around some point using information from its neighbor elements, as shown in figure \ref{I_Five_point_stencil_illustration.png}. A stencil operation can be done over a mesh using series of time sweeps to update its value using neighboring values at which the stencil is centered.
 \begin{figure}[h]

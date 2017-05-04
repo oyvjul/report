@@ -58,7 +58,7 @@ For an ease of understanding the process of how the structured mesh is generated
      \label{m_grid_points.png}
 \end{figure}
 
-Before filling the structured mesh with mesh points, I need to know the boundary values for the tetrahedral mesh, which involves computing the minimum and maximum values for the x, y and z coordinates in the coordinate system. The boundary values will be used as a upper and lower limit for the structured mesh, aswell as a stepping value for generating uniformly distributed mesh points. The stepping value is the distance between each mesh point. The algorithm for determining the stepping value in the x-direction is given in equation \ref{step}.
+Before filling the structured mesh with mesh points, I need to know the boundary values for the tetrahedral mesh, which involves computing the minimum and maximum values for the x, y and z coordinates in the coordinate system. The boundary values will be used as a upper and lower limit for the structured mesh, aswell as a stepping value for generating uniformly distributed mesh points. The stepping value is the distance between each mesh point in the structured mesh. The algorithm for determining the stepping value in the x, y and z direction is given in equation \ref{step}.
 %%\begin{lstlisting}[caption={Cache Blocking} ,label={lst:stepx}]
 %%step_x = (x_max - x_min)/nx;
 %%\end{lstlisting}
@@ -85,12 +85,92 @@ Where \(i\) is an increment of the total number of points in one direction.
 
 
 \section{The Binary cube}
-After the structured mesh has been filled with points, each point is checked with respect to the original 3D heart volume, being either inside or outside. More specifically, the mesh points is checked with respect to every tetrahedra in the unstructured mesh. The resulting data structured is what is referred to as a binary cube, consisting of both the inside and outside points. The inside points will be given a numerical value which will be used later in the heart simulation, while the outside points are given a value to be identified commonly to all outside points.
+After the structured mesh has been filled with points, each point is checked with respect to the original 3D heart volume, being either inside or outside. More specifically, the mesh points is checked with respect to every tetrahedra in the unstructured mesh. The resulting data structured t is referred to as a binary cube, consisting of both the inside and outside points. The inside points will be given a numerical value which will be used later in the heart simulation, while the outside points are given a value to be identified commonly to all outside points.
 
-\subsection{Pre Processing of the Binary Cube}
-The binary cube is a representation of all the generated points, stored in a 3D array. 
+The binary cube is a representation of all the generated points, stored in a 3D array. The process of filling the 3D binary cube with data yields a complexity of 4 for loops. The 3 outermost for loops iterates over the respective x, y, and z coordinates. While the innermost for loop iterates over every tetrahedron in the list, with the goal of extracting the x, y and z coordinates from the 4 vertices of every tetrahedron.
 
-The generation of the binary cube is a time consuming process. 
+one dimension in the 3D array equals one dimension in the coordinate system. This results in a total of three for loops
+
+One approach of finding out if a point is inside a given tetrahedron, as given in [LINK], is to check if a generated point, \(P\) and a tetrahedron vertex point \( V_{i}\) is on the same side of the boundary as \( i\). 
+\[
+V_{a} = (x_{0}, y_{0}, z_{0}) 
+\]
+\[
+V_{b} = (x_{1}, y_{1}, z_{1})
+\]
+\[
+V_{c} = (x_{2}, y_{2}, z_{2})
+\]
+\[
+V_{d} = (x_{3}, y_{3}, z_{3})
+\]
+
+\[
+P = (x, y, z)
+\]
+The first step of checking if a point is inside a tetrahedron involves computing the \(4 \times 4\) determinant of all the four vertices in the tetrahedron,  \(D_{0}\). The next step involves replacing one vertex point, with the generated point, for all the vertices in the matrix. This results in a total of four, \(4 \times 4\) determinant operations, going from \(D_{1}\) to \(D_{4}\). 
+\[
+D_{0} =
+\begin{vmatrix}
+x_{0} & y_{0} & z_{0} & 1 \\ 
+x_{1} & y_{1} & z_{1} & 1 \\ 
+x_{2} & y_{2} & z_{2} & 1 \\ 
+x_{3} & y_{3} & z_{3} & 1 \\ 
+\end{vmatrix}
+\]
+
+\[
+D_{1} =
+\begin{vmatrix}
+x & y & z & 1 \\ 
+x_{1} & y_{1} & z_{1} & 1 \\ 
+x_{2} & y_{2} & z_{2} & 1 \\ 
+x_{3} & y_{3} & z_{3} & 1 \\ 
+\end{vmatrix}
+\]
+
+\[
+D_{2} =
+\begin{vmatrix}
+x_{0} & y_{0} & z_{0} & 1 \\ 
+x & y & z & 1 \\ 
+x_{2} & y_{2} & z_{2} & 1 \\ 
+x_{3} & y_{3} & z_{3} & 1 \\ 
+\end{vmatrix}
+\]
+
+\[
+D_{3} =
+\begin{vmatrix}
+x_{0} & y_{0} & z_{0} & 1 \\ 
+x_{1} & y_{1} & z_{1} & 1 \\ 
+x & y & z & 1 \\ 
+x_{3} & y_{3} & z_{3} & 1 \\ 
+\end{vmatrix}
+\]
+
+\[
+D_{4} =
+\begin{vmatrix}
+x_{0} & y_{0} & z_{0} & 1 \\ 
+x_{1} & y_{1} & z_{1} & 1 \\ 
+x_{2} & y_{2} & z_{2} & 1 \\ 
+x & y & z & 1 \\ 
+\end{vmatrix}
+\]
+
+The last and final step, involves comparing the signs of \(D_{i}\) to \(D_{0}\). If the sign of any \(D_{i}\) equals that of \(D_{0}\), then the point, \(P\) is inside the boundary \(i\). If all the \(D_{i}\) share the same sign as \(D_{0}\), then the point \(P\) is inside all the 4 boundaries, and more specifically, \(P\) is inside the tetrahedron.
+
+
+The generation of the binary cube is a time consuming process. Which at most, yields a total number of 
+\begin{equation} 
+X \times\ Y \times Z  \times \textrm{Total number of tetrahedrons}
+\end{equation}  
+iterations, and for an average case of 
+\begin{equation} 
+X \times\ Y \times Z  \times \frac{\textrm{Total number of tetrahedrons}}{2}
+\end{equation} 
+iterations.  
 
 \section{The Simulation}
 start of simulation
