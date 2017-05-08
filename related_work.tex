@@ -87,28 +87,26 @@ Where \(i\) is an increment of the total number of points in one direction.
 \section{The Binary cube}
 After the structured mesh has been filled with points, each point is checked with respect to the original 3D heart volume, being either inside or outside. More specifically, the mesh points is checked with respect to every tetrahedra in the unstructured mesh. The resulting data structured t is referred to as a binary cube, consisting of both the inside and outside points. The inside points will be given a numerical value which will be used later in the heart simulation, while the outside points are given a value to be identified commonly to all outside points.
 
-The binary cube is a representation of all the generated points, stored in a 3D array. The process of filling the 3D binary cube with data yields a complexity of 4 for loops. The 3 outermost for loops iterates over the respective x, y, and z coordinates. While the innermost for loop iterates over every tetrahedron in the list, with the goal of extracting the x, y and z coordinates from the 4 vertices of every tetrahedron.
+The binary cube is a representation of all the generated points, stored in a 3D array. The process of filling the 3D binary cube with data yields a complexity of 4 for loops. The 3 outermost for loops iterates over the respective x, y, and z coordinates. While the innermost for loop iterates over every tetrahedron in the list, with the goal of extracting the x, y and z coordinates from the 4 vertices of every tetrahedron. The vertex points extracted from the tetrahedrons are used for the process of checking whether or not a generated point in the binary cube is inside the tetrahedron.
 
-one dimension in the 3D array equals one dimension in the coordinate system. This results in a total of three for loops
-
-One approach of finding out if a point is inside a given tetrahedron, as given in [LINK], is to check if a generated point, \(P\) and a tetrahedron vertex point \( V_{i}\) is on the same side of the boundary as \( i\). 
+One approach of finding out if a point, \(P\) is inside a given tetrahedron, as given in [LINK], is to check if \(P\) and a tetrahedron vertex point \( V_{i}\) is on the same side of the boundary as \( i\). 
 \[
-V_{a} = (x_{0}, y_{0}, z_{0}) 
+V_{0} = (x_{0}, y_{0}, z_{0}) 
 \]
 \[
-V_{b} = (x_{1}, y_{1}, z_{1})
+V_{1} = (x_{1}, y_{1}, z_{1})
 \]
 \[
-V_{c} = (x_{2}, y_{2}, z_{2})
+V_{2} = (x_{2}, y_{2}, z_{2})
 \]
 \[
-V_{d} = (x_{3}, y_{3}, z_{3})
+V_{3} = (x_{3}, y_{3}, z_{3})
 \]
 
 \[
 P = (x, y, z)
 \]
-The first step of checking if a point is inside a tetrahedron involves computing the \(4 \times 4\) determinant of all the four vertices in the tetrahedron,  \(D_{0}\). The next step involves replacing one vertex point, with the generated point, for all the vertices in the matrix. This results in a total of four, \(4 \times 4\) determinant operations, going from \(D_{1}\) to \(D_{4}\). 
+The first step of checking if a point is inside a tetrahedron involves computing the \(4 \times 4\) determinant of all the four vertices in the tetrahedron,  \(D_{0}\). The next step involves replacing one vertex point, with  \(P\), for all the vertices in the matrix. This results in a total of four, \(4 \times 4\) determinant operations, going from \(D_{1}\) to \(D_{4}\). 
 \[
 D_{0} =
 \begin{vmatrix}
@@ -159,9 +157,10 @@ x & y & z & 1 \\
 \end{vmatrix}
 \]
 
-The last and final step, involves comparing the signs of \(D_{i}\) to \(D_{0}\). If the sign of any \(D_{i}\) equals that of \(D_{0}\), then the point, \(P\) is inside the boundary \(i\). If all the \(D_{i}\) share the same sign as \(D_{0}\), then the point \(P\) is inside all the 4 boundaries, and more specifically, \(P\) is inside the tetrahedron.
+The last and final step, involves comparing the signs of \(D_{i}\) to \(D_{0}\). If the sign of any \(D_{i}\) equals that of \(D_{0}\), then \(P\) is inside the boundary \(i\). If all the \(D_{i}\) share the same sign as \(D_{0}\), then the point \(P\) is inside all the 4 boundaries, and more specifically, \(P\) is inside the tetrahedron.
 
 
+The experimental tests was conducted on an unstructured heart model consisting of 32
 The generation of the binary cube is a time consuming process. Which at most, yields a total number of 
 \begin{equation} 
 X \times\ Y \times Z  \times \textrm{Total number of tetrahedrons}
