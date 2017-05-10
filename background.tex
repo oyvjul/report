@@ -163,7 +163,7 @@ S = \frac{T_s}{T_p}
 \end{equation}
 
 \subsection{Bandwidth}
-As in the case of determining the computational performance of an implementation given in section \ref{subsec:flops}. Another useful metric for determining the memory bandwidth performance of an implementation is to measure the movement of bytes from the memory, to the CPU per second. The memory bandwidth can be attained by calculating the ratio of number of loads multiplied by the datatype (in bytes) and arrays size to the time measured time executing the loop.
+As in the case of determining the computational performance of an implementation given in section \ref{subsec:flops}. Another useful metric for determining the memory bandwidth performance of an implementation is to measure the movement of bytes from the memory, to the CPU per second. The memory bandwidth can be attained by calculating the ratio of number of reads and writes multiplied by the datatype (in bytes) and array size to the time measured executing the loop.
 
 \begin{equation} \label{bw}
 \frac{\textrm{Number of loads} \times \textrm{Datatype}  \times \textrm{Array size}}{\textrm{Time spent}} 

@@ -1,11 +1,7 @@
 \chapter{The Unstructured Heart as a Binary Cube} 
-After a MRI scan of the heart, the resulting data are stored as a point cloud, which is a huge collection of unstructured points, that typically needs advanced mesh generation techniques that consists of triangulations of the stored point cloud to form an accurate 3-D model of the human heart, that more specifically, is a large collection tetrahedras. 
+After a MRI scan of the heart, the resulting data are stored as a point cloud, which is a huge collection of unstructured points, that typically needs advanced mesh generation techniques that consists of triangulations of the stored point cloud to form an accurate 3-D model of the human heart, that more specifically, is a large collection tetrahedrons. 
 
-The goal of my implementation is to generate a uniformly structured mesh, using the unstructured data as a basis for checking if a generated point is inside or outside the unstructured heart geometry. The resulting structured mesh will consist of points both inside and outside the heart, but will later be numerically masked away. A detailed description of the numerical strategy will be provided later in section X.X.
-
-\section{Motivation}
-%%explain motivation behind doing this.
-As [HEART BOOK]
+The goal of the binary cube is to generate a uniformly structured mesh, using the unstructured data as a basis for checking if a generated point is inside or outside the unstructured heart geometry. The resulting structured mesh will consist of points both inside and outside the heart, but will later be numerically masked away. A detailed description of the numerical strategy will be provided later in section X.X.
 
 \section{The Processing of Unstructured data}
 The unstructured data, consisting of a collection of vertex points, edges, faces, and a description of neighbouring elements comes in several different files. In the process of generating the structured mesh from the unstrctured data, an extraction of the tetrahedras vertex points are the only necessary information needed, due to the reason that you only need to check if a generated point is inside or outside a given tetrahedra. The complete process of mesh generation can be found later in section \ref{generating_the structured_mesh}.
@@ -58,7 +54,7 @@ For an ease of understanding the process of how the structured mesh is generated
      \label{m_grid_points.png}
 \end{figure}
 
-Before filling the structured mesh with mesh points, I need to know the boundary values for the tetrahedral mesh, which involves computing the minimum and maximum values for the x, y and z coordinates in the coordinate system. The boundary values will be used as a upper and lower limit for the structured mesh, aswell as a stepping value for generating uniformly distributed mesh points. The stepping value is the distance between each mesh point in the structured mesh. The algorithm for determining the stepping value in the x, y and z direction is given in equation \ref{step}.
+Before filling the structured mesh with mesh points, I need to know the boundary values for the tetrahedral mesh, which involves computing the minimum and maximum values for the x, y and z coordinates in the coordinate system. The boundary values will be used as a upper and lower limit for the structured mesh, aswell as a stepping value between those points for generating uniformly distributed mesh points. The stepping value is the distance between each mesh point in the structured mesh. The algorithm for determining the stepping value in the x, y and z direction is given in equation \ref{step}.
 %%\begin{lstlisting}[caption={Cache Blocking} ,label={lst:stepx}]
 %%step_x = (x_max - x_min)/nx;
 %%\end{lstlisting}
@@ -159,9 +155,12 @@ x & y & z & 1 \\
 
 The last and final step, involves comparing the signs of \(D_{i}\) to \(D_{0}\). If the sign of any \(D_{i}\) equals that of \(D_{0}\), then \(P\) is inside the boundary \(i\). If all the \(D_{i}\) share the same sign as \(D_{0}\), then the point \(P\) is inside all the 4 boundaries, and more specifically, \(P\) is inside the tetrahedron.
 
+\section{The Experimental Test Model}
+The experimental tests was conducted on an unstructured heart model consisting of 32664 tetrahedrons. This is typically referred to as a coarse grained model, meaning that the resolution of the heart model is quite low compared to much more finer grained models that typically has millions of tetrahedrons. Although, the method of generating the structured mesh involves a high freedom of choice when it comes to deciding the resolution of the structured mesh. Since the descicion of how many points there is to be generated is entirely up to the programmer, the resolution of the structured mesh has thus in theory no upper limit. One of the reasons for selecting a more coarse grained model as opposed to a model that contains a much higher count of tetrahedrons, is for the fact that as long as the outer layer of the heart, more specifically, the heart geometry is accurate in terms of the tetrahedron resolution, the resulting structured heart mesh will still have a precise description of the heart. The inner layer of the unstructured heart mesh becomes less important in terms of the resolution of the tetrahedrons, as the structured method generates uniformly distributed points. More specifically the number of points and the stepping value between those points are entirely up to the programmer to decide, making it a flexible solution.
 
-The experimental tests was conducted on an unstructured heart model consisting of 32
-The generation of the binary cube is a time consuming process. Which at most, yields a total number of 
+The generation of the binary cube is a time consuming process. 
+
+Which at most, yields a total number of 
 \begin{equation} 
 X \times\ Y \times Z  \times \textrm{Total number of tetrahedrons}
 \end{equation}  
@@ -170,6 +169,8 @@ iterations, and for an average case of
 X \times\ Y \times Z  \times \frac{\textrm{Total number of tetrahedrons}}{2}
 \end{equation} 
 iterations.  
+
+\section{A Parallel Approach}
 
 \section{The Simulation}
 start of simulation
