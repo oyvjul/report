@@ -158,25 +158,19 @@ The last and final step, involves comparing the signs of \(D_{i}\) to \(D_{0}\).
 \section{The Experimental Heart Model}
 The experimental tests was conducted on an unstructured heart model consisting of 32664 tetrahedrons. This is typically referred to as a coarse grained model, meaning that the resolution of the heart model is quite low compared to much more finer grained models that typically has millions of tetrahedrons. Although, the method of generating the structured mesh involves a high freedom of choice when it comes to deciding the resolution of the structured mesh. Since the descicion of how many points there is to be generated is entirely up to the programmer, the resolution of the structured mesh has thus in theory no upper limit. One of the reasons for selecting a more coarse grained model as opposed to a model that contains a much higher count of tetrahedrons, is for the fact that as long as the outer layer of the heart, more specifically, the heart geometry is accurate in terms of the tetrahedron resolution, the resulting structured heart mesh will still have a precise description of the heart. The inner layer of the unstructured heart mesh becomes less important in terms of the resolution of the tetrahedrons, as the structured method generates uniformly distributed points. More specifically the number of points and the stepping value between those points are entirely up to the programmer to decide, making it a flexible solution.
 
-The generation of the binary cube is a time consuming process. For all the points that is outside the cube 
-
-Which at most, yields a total number of 
+The generation of the binary cube is a time consuming process. For all the generated points that is outside the heart geometry, the computation yields a total number of 
 \begin{equation} 
 X \times\ Y \times Z  \times \textrm{Total number of tetrahedrons}
 \end{equation}  
-iterations, and for an average case of 
+iterations. For an average case of all the points that is inside the heart geometry, the computation yields a total number of 
 \begin{equation} 
 X \times\ Y \times Z  \times \frac{\textrm{Total number of tetrahedrons}}{2}
 \end{equation} 
 iterations.  
 
 \section{A Parallel Approach}
+If the method for generation of the binary cube is to be sped up, one approach would be to parallelize the cube. A viable strategy is to first divide the entire 3D cube into a number of smaller subcubes. Where each process has its own respective x, y and z coordinates for checking against the original heart geometry, being either inside or outside. 
 
-\section{The Simulation}
-start of simulation
-
-\section{Masking Away Outside Points}
-Numerical strategy
 
 
 
